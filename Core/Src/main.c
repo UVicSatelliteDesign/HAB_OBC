@@ -624,11 +624,13 @@ void StartPollingLoop(void *argument)
 	for(;;){
 
 		if(HAL_GetTick() - time1Min >= 60000){
+		time1Min = HAL_GetTick();
 		checkBattery();
 		checkLocation();
 	}
 
 	if(HAL_GetTick() - time10Min >= 600000){
+		time10Min = HAL_GetTick();
 		if(descendFlag == 1){
 				cutBalloon();
 			}

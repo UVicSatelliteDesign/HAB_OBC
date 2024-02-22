@@ -13,7 +13,7 @@
 ../Core/Src/main.c:509:13:MX_USB_OTG_FS_PCD_Init	2
 ../Core/Src/main.c:545:13:MX_GPIO_Init	1
 ../Core/Src/main.c:617:6:StartPollingLoop	4
-../Core/Src/main.c:641:6:BatteryCallback	1
-../Core/Src/main.c:649:6:DescensionCallback	1
-../Core/Src/main.c:664:6:HAL_TIM_PeriodElapsedCallback	2
-../Core/Src/main.c:682:6:Error_Handler	1
+../Core/Src/main.c:644:6:BatteryCallback	1
+../Core/Src/main.c:652:6:DescensionCallback	1
+../Core/Src/main.c:667:6:HAL_TIM_PeriodElapsedCallback	2
+../Core/Src/main.c:685:6:Error_Handler	1
