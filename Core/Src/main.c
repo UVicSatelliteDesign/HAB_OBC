@@ -136,9 +136,15 @@ void cutBalloon(){
 }
 
 void lowPowerMode(){
-
+	int time10Min = 0;
     //stopTransmitter();
+	//log data()
     while(1){
+    	if(HAL_GetTick() - time10Min >= 600000){
+    		time10Min = HAL_GetTick();
+    		//log lpm data()
+
+    	}
     }
 }
 
@@ -154,9 +160,7 @@ void checkBattery(){
 
 int checkAltitude(float altitude){
 	if (altitude < prevAltitude){
-		descendFlag = 1;
-	} else {
-		descendFlag = 0;
+		descendFlag+= 1;
 	}
     if (altitude >= maxAltitude){
         return 1;
@@ -189,21 +193,6 @@ void checkLocation(void){
 
     cutBalloon();
 }
-
-
-
-void exampleTimer1Min(){
-	checkBattery();
-	checkLocation();
-}
-
-void exampleTimer10Mins(){
-	if(descendFlag == 1){
-		cutBalloon();
-	}
-}
-
-
 
 
 /* USER CODE END 0 */
@@ -618,7 +607,6 @@ void StartPollingLoop(void *argument)
 {
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
-
 	int time1Min = 0;
 	int time10Min = 0;
 	for(;;){
@@ -627,11 +615,12 @@ void StartPollingLoop(void *argument)
 		time1Min = HAL_GetTick();
 		checkBattery();
 		checkLocation();
+		//logData(longitude, latitude, altitude);
 	}
 
 	if(HAL_GetTick() - time10Min >= 600000){
 		time10Min = HAL_GetTick();
-		if(descendFlag == 1){
+		if(descendFlag >= 10){
 				cutBalloon();
 			}
 
