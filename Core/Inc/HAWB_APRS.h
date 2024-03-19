@@ -10,8 +10,8 @@
 
 #include "stm32h7xx_hal.h"
 
-#pragma pack(1, push)
-typedef struct __Position {
+#pragma pack(push, 1)
+typedef volatile struct __Position {
 	float longitude;
 	float latitude;
 	float altitude;
@@ -19,5 +19,6 @@ typedef struct __Position {
 #pragma pack(pop)
 
 HAL_StatusTypeDef getLocation(SPI_HandleTypeDef* hspi, Position* pos);
+void getLocationClbk(SPI_HandleTypeDef* hspi);
 
 #endif /* INC_HAWB_APRS_H_ */

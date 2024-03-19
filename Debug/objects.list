@@ -1,4 +1,4 @@
-"./Core/Src/HAWB_APRS_lib.o"
+"./Core/Src/HAWB_APRS.o"
 "./Core/Src/freertos.o"
 "./Core/Src/main.o"
 "./Core/Src/stm32h7xx_hal_msp.o"

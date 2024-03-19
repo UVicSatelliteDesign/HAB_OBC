@@ -64,8 +64,8 @@ all: main-build
 main-build: weatherballoon.elf secondary-outputs
 
 # Tool invocations
-weatherballoon.elf weatherballoon.map: $(OBJS) $(USER_OBJS) C:\Users\tahaf\STM32CubeIDE\workspace_1.13.2\weatherballoon\STM32H743ZITX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "weatherballoon.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"C:\Users\tahaf\STM32CubeIDE\workspace_1.13.2\weatherballoon\STM32H743ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="weatherballoon.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+weatherballoon.elf weatherballoon.map: $(OBJS) $(USER_OBJS) /home/uvsd/Documents/HAB_OBC/STM32H743ZITX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "weatherballoon.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"/home/uvsd/Documents/HAB_OBC/STM32H743ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="weatherballoon.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

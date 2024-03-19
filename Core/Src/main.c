@@ -107,7 +107,7 @@ const osTimerAttr_t descensionTimer_attributes = {
   .name = "descensionTimer"
 };
 /* USER CODE BEGIN PV */
-
+Position position;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -233,7 +233,8 @@ int main(void)
   MX_ETH_Init();
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
-
+  getLocation(&hspi1, &position);
+  HAL_SPI_RegisterCallback(&hspi1, HAL_SPI_RX_COMPLETE_CB_ID, getLocationClbk);
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -542,6 +543,9 @@ static void MX_DMA_Init(void)
   /* DMA1_Stream0_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Stream0_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA1_Stream0_IRQn);
+  /* DMAMUX1_OVR_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMAMUX1_OVR_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMAMUX1_OVR_IRQn);
 
 }
 
