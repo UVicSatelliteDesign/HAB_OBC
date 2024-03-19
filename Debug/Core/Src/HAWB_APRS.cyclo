@@ -1,3 +1,0 @@
-../Core/Src/HAWB_APRS.c:21:19:getLocation	1
-../Core/Src/HAWB_APRS.c:30:6:getLocationClbk	2
-../Core/Src/HAWB_APRS.c:41:13:readBE4SPI	1
