@@ -24,25 +24,6 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
-#include <stdio.h>
-
-
-#define powMin 10  // Replace with the actual power threshold value
-#define maxLongitude 0
-#define minLongitude 0
-#define maxLatitude 0
-#define minLatitude 0
-#define maxAltitude 0
-
-
-int descendFlag = 0;
-float prevAltitude = 0;
-
-typedef struct {
-    int longitude;
-    int latitude;
-    int altitude;
-} Coordinates;
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -52,6 +33,17 @@ typedef struct {
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define minVoltage 1065  //minimum voltage for LPM
+#define maxLongitude 0
+#define minLongitude 0
+#define maxLatitude 0
+#define minLatitude 0
+#define maxAltitude 0
+#define VREF 3.3  // Reference voltage for s
+#define adcMaxValue 4095.0  // Maximum ADC value for 12-bit ADC
+#define sensitivity 0.185  // Sensitivity of ACS712ELCTR-05B in V/A
+#define adcMaxVal 4096 // Max value for the ADC
+
 
 /* USER CODE END PD */
 
@@ -80,10 +72,9 @@ ETH_DMADescTypeDef DMATxDscrTab[ETH_TX_DESC_CNT] __attribute__((section(".TxDecr
 
 ETH_TxPacketConfig TxConfig;
 
-ETH_HandleTypeDef heth;
+ADC_HandleTypeDef hadc1;
 
-SPI_HandleTypeDef hspi1;
-DMA_HandleTypeDef hdma_spi1_rx;
+ETH_HandleTypeDef heth;
 
 UART_HandleTypeDef huart3;
 
@@ -96,31 +87,21 @@ const osThreadAttr_t PollingLoop_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
-/* Definitions for batteryTimer */
-osTimerId_t batteryTimerHandle;
-const osTimerAttr_t batteryTimer_attributes = {
-  .name = "batteryTimer"
-};
-/* Definitions for descensionTimer */
-osTimerId_t descensionTimerHandle;
-const osTimerAttr_t descensionTimer_attributes = {
-  .name = "descensionTimer"
-};
 /* USER CODE BEGIN PV */
-Position position;
+
+int descendFlag = 0;
+float prevAltitude = 0;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_DMA_Init(void);
+static void MX_ETH_Init(void);
 static void MX_USART3_UART_Init(void);
 static void MX_USB_OTG_FS_PCD_Init(void);
-static void MX_ETH_Init(void);
-static void MX_SPI1_Init(void);
-void StartPollingLoop(void *argument);
-void BatteryCallback(void *argument);
-void DescensionCallback(void *argument);
+static void MX_ADC1_Init(void);
+void startPollingLoop(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -130,36 +111,100 @@ void DescensionCallback(void *argument);
 /* USER CODE BEGIN 0 */
 
 
+/**
+ * @brief Gets the ADC value from the sensor.
+ * @return The ADC value.
+ */
+uint32_t getADCValue() {
+    uint32_t adcValue = 0;
+
+    // Start ADC conversion
+    HAL_ADC_Start(&hadc1);
+
+    // Wait for the conversion to complete
+    HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
+
+    // Read the ADC value
+    adcValue = HAL_ADC_GetValue(&hadc1);
+
+    // Stop ADC
+    HAL_ADC_Stop(&hadc1);
+
+    return adcValue;
+}
 
 
+/**
+ * @brief Converts ADC value to voltage.
+ * @return The voltage value.
+ */
+float getVoltage(){
+
+	float adcValue = getADCValue();
+
+    float voltage = (adcValue * VREF) / adcMaxVal;
+
+    return voltage;
+
+}
+
+
+/**
+ * @brief Converts voltage to current.
+ * @return The current value.
+ */
+float getCurrent(){
+	float voltage = getVoltage();
+	float current = voltage/sensitivity;
+	return current;
+}
+
+/**
+ * @brief Sets the GPIO pin to high effectively cutting the balloon.
+ */
 void cutBalloon(){
-	//set to pin to high HAL FUNCTION WITH PIN
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOG, GPIO_PIN_0, GPIO_PIN_SET);
+
 }
 
+/**
+ * @brief Enters low power mode if battery voltage is low.
+ */
 void lowPowerMode(){
-	int time10Min = 0;
-    //stopTransmitter();
-	//log data()
-    while(1){
-    	if(HAL_GetTick() - time10Min >= 600000){
-    		time10Min = HAL_GetTick();
-    		//log lpm data()
+	float voltage = getVoltage();
+	float current = getCurrent();
+	float time = HAL_GetTick();
+	//longitude
+	//latitude
+	//altitude
+	//temp
 
-    	}
-    }
+	//logData(voltage, current, time, longitude, latitude, altitude, temp)
+	cutBalloon();
+	while(1){
+
+	}
+
+
 }
 
+/**
+ * @brief Checks battery voltage and enters low power mode if voltage is low (<20%).
+ */
 void checkBattery(){
-	float batteryVoltage = 0;
-
-		if (batteryVoltage <= powMin){
+	float batteryVoltage = getVoltage();
+		if (batteryVoltage <= minVoltage){
 			lowPowerMode();
 		}
 }
 
 
 
+/**
+ * @brief Checks if altitude is within acceptable range and calls cutBalloon if altitude exceeds max altitude.
+ * @param altitude The current altitude.
+ * @return 1 if altitude exceeds max altitude, 0 otherwise.
+ */
 int checkAltitude(float altitude){
 	if (altitude < prevAltitude){
 		descendFlag+= 1;
@@ -171,23 +216,30 @@ int checkAltitude(float altitude){
     return 0;
 }
 
-
+/**
+ * @brief Checks if the current location is within acceptable range and calls cutBalloon if not.
+ */
 void checkLocation(void){
 
-    // getLongitude(), getLatitude(), getAltitude(), and locationDisplay() are placeholders
-   // int longitude = function.longitude();
-   // int latitude = function.latitude();
-   // int altitude = function.altitude();
+   // float longitude = function.longitude();
+   // float latitude = function.latitude();
+   // float altitude = function.altitude();
 
+	//placeholders so program can build
     float longitude = 0;
     float latitude = 0;
     float altitude = 0;
 
-
+    //checking if the current location is within the min and max longitude
     if (longitude < maxLongitude && longitude > minLongitude){
+
+    	//checking if the current location is within the min and max latitude
         if(latitude < maxLatitude && latitude > minLatitude){
+
+        	//checking if it is lower than the max altitude
             if(checkAltitude(altitude) == 1){
-                cutBalloon();
+                lowPowerMode();
+                return;
             }
             return;
         }
@@ -195,7 +247,6 @@ void checkLocation(void){
 
     cutBalloon();
 }
-
 
 /* USER CODE END 0 */
 
@@ -227,14 +278,12 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_DMA_Init();
+  MX_ETH_Init();
   MX_USART3_UART_Init();
   MX_USB_OTG_FS_PCD_Init();
-  MX_ETH_Init();
-  MX_SPI1_Init();
+  MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
-  getLocation(&hspi1, &position);
-  HAL_SPI_RegisterCallback(&hspi1, HAL_SPI_RX_COMPLETE_CB_ID, getLocationClbk);
+
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -248,13 +297,6 @@ int main(void)
   /* add semaphores, ... */
   /* USER CODE END RTOS_SEMAPHORES */
 
-  /* Create the timer(s) */
-  /* creation of batteryTimer */
-  batteryTimerHandle = osTimerNew(BatteryCallback, osTimerPeriodic, NULL, &batteryTimer_attributes);
-
-  /* creation of descensionTimer */
-  descensionTimerHandle = osTimerNew(DescensionCallback, osTimerPeriodic, NULL, &descensionTimer_attributes);
-
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
@@ -265,7 +307,7 @@ int main(void)
 
   /* Create the thread(s) */
   /* creation of PollingLoop */
-  PollingLoopHandle = osThreadNew(StartPollingLoop, NULL, &PollingLoop_attributes);
+  PollingLoopHandle = osThreadNew(startPollingLoop, NULL, &PollingLoop_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -351,6 +393,74 @@ void SystemClock_Config(void)
 }
 
 /**
+  * @brief ADC1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_ADC1_Init(void)
+{
+
+  /* USER CODE BEGIN ADC1_Init 0 */
+
+  /* USER CODE END ADC1_Init 0 */
+
+  ADC_MultiModeTypeDef multimode = {0};
+  ADC_ChannelConfTypeDef sConfig = {0};
+
+  /* USER CODE BEGIN ADC1_Init 1 */
+
+  /* USER CODE END ADC1_Init 1 */
+
+  /** Common config
+  */
+  hadc1.Instance = ADC1;
+  hadc1.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV1;
+  hadc1.Init.Resolution = ADC_RESOLUTION_16B;
+  hadc1.Init.ScanConvMode = ADC_SCAN_DISABLE;
+  hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+  hadc1.Init.LowPowerAutoWait = DISABLE;
+  hadc1.Init.ContinuousConvMode = DISABLE;
+  hadc1.Init.NbrOfConversion = 1;
+  hadc1.Init.DiscontinuousConvMode = DISABLE;
+  hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+  hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
+  hadc1.Init.ConversionDataManagement = ADC_CONVERSIONDATA_DR;
+  hadc1.Init.Overrun = ADC_OVR_DATA_PRESERVED;
+  hadc1.Init.LeftBitShift = ADC_LEFTBITSHIFT_NONE;
+  hadc1.Init.OversamplingMode = DISABLE;
+  if (HAL_ADC_Init(&hadc1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure the ADC multi-mode
+  */
+  multimode.Mode = ADC_MODE_INDEPENDENT;
+  if (HAL_ADCEx_MultiModeConfigChannel(&hadc1, &multimode) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure Regular Channel
+  */
+  sConfig.Channel = ADC_CHANNEL_15;
+  sConfig.Rank = ADC_REGULAR_RANK_1;
+  sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
+  sConfig.SingleDiff = ADC_SINGLE_ENDED;
+  sConfig.OffsetNumber = ADC_OFFSET_NONE;
+  sConfig.Offset = 0;
+  sConfig.OffsetSignedSaturation = DISABLE;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN ADC1_Init 2 */
+
+  /* USER CODE END ADC1_Init 2 */
+
+}
+
+/**
   * @brief ETH Initialization Function
   * @param None
   * @retval None
@@ -396,53 +506,6 @@ static void MX_ETH_Init(void)
   /* USER CODE BEGIN ETH_Init 2 */
 
   /* USER CODE END ETH_Init 2 */
-
-}
-
-/**
-  * @brief SPI1 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_SPI1_Init(void)
-{
-
-  /* USER CODE BEGIN SPI1_Init 0 */
-
-  /* USER CODE END SPI1_Init 0 */
-
-  /* USER CODE BEGIN SPI1_Init 1 */
-
-  /* USER CODE END SPI1_Init 1 */
-  /* SPI1 parameter configuration*/
-  hspi1.Instance = SPI1;
-  hspi1.Init.Mode = SPI_MODE_SLAVE;
-  hspi1.Init.Direction = SPI_DIRECTION_2LINES_RXONLY;
-  hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
-  hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
-  hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
-  hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
-  hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
-  hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-  hspi1.Init.CRCPolynomial = 0x0;
-  hspi1.Init.NSSPMode = SPI_NSS_PULSE_DISABLE;
-  hspi1.Init.NSSPolarity = SPI_NSS_POLARITY_LOW;
-  hspi1.Init.FifoThreshold = SPI_FIFO_THRESHOLD_01DATA;
-  hspi1.Init.TxCRCInitializationPattern = SPI_CRC_INITIALIZATION_ALL_ZERO_PATTERN;
-  hspi1.Init.RxCRCInitializationPattern = SPI_CRC_INITIALIZATION_ALL_ZERO_PATTERN;
-  hspi1.Init.MasterSSIdleness = SPI_MASTER_SS_IDLENESS_00CYCLE;
-  hspi1.Init.MasterInterDataIdleness = SPI_MASTER_INTERDATA_IDLENESS_00CYCLE;
-  hspi1.Init.MasterReceiverAutoSusp = SPI_MASTER_RX_AUTOSUSP_DISABLE;
-  hspi1.Init.MasterKeepIOState = SPI_MASTER_KEEP_IO_STATE_DISABLE;
-  hspi1.Init.IOSwap = SPI_IO_SWAP_DISABLE;
-  if (HAL_SPI_Init(&hspi1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN SPI1_Init 2 */
-
-  /* USER CODE END SPI1_Init 2 */
 
 }
 
@@ -531,25 +594,6 @@ static void MX_USB_OTG_FS_PCD_Init(void)
 }
 
 /**
-  * Enable DMA controller clock
-  */
-static void MX_DMA_Init(void)
-{
-
-  /* DMA controller clock enable */
-  __HAL_RCC_DMA1_CLK_ENABLE();
-
-  /* DMA interrupt init */
-  /* DMA1_Stream0_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Stream0_IRQn, 5, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Stream0_IRQn);
-  /* DMAMUX1_OVR_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMAMUX1_OVR_IRQn, 5, 0);
-  HAL_NVIC_EnableIRQ(DMAMUX1_OVR_IRQn);
-
-}
-
-/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -619,75 +663,45 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE END 4 */
 
-/* USER CODE BEGIN Header_StartPollingLoop */
+/* USER CODE BEGIN Header_startPollingLoop */
 /**
   * @brief  Function implementing the PollingLoop thread.
   * @param  argument: Not used
   * @retval None
   */
-/* USER CODE END Header_StartPollingLoop */
-void StartPollingLoop(void *argument)
+/* USER CODE END Header_startPollingLoop */
+void startPollingLoop(void *argument)
 {
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
 	int time1Min = 0;
 	int time10Min = 0;
+
 	for(;;){
 
+		//checking if 1 minute has passed
 		if(HAL_GetTick() - time1Min >= 60000){
 		time1Min = HAL_GetTick();
+
+		//checking battery percentage
 		checkBattery();
+
+		//checking current location
 		checkLocation();
 		//logData(longitude, latitude, altitude);
-	}
+		}
 
-	if(HAL_GetTick() - time10Min >= 600000){
-		time10Min = HAL_GetTick();
-		if(descendFlag >= 10){
-				cutBalloon();
+		//checking if 10 minutes have passed
+		if(HAL_GetTick() - time10Min >= 600000){
+			time10Min = HAL_GetTick();
+
+			if(descendFlag >= 10){
+				lowPowerMode();
 			}
 
+		}
 	}
- }
   /* USER CODE END 5 */
-}
-
-/* BatteryCallback function */
-void BatteryCallback(void *argument)
-{
-  /* USER CODE BEGIN BatteryCallback */
-
-  /* USER CODE END BatteryCallback */
-}
-
-/* DescensionCallback function */
-void DescensionCallback(void *argument)
-{
-  /* USER CODE BEGIN DescensionCallback */
-
-  /* USER CODE END DescensionCallback */
-}
-
-/**
-  * @brief  Period elapsed callback in non blocking mode
-  * @note   This function is called  when TIM6 interrupt took place, inside
-  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
-  * a global variable "uwTick" used as application time base.
-  * @param  htim : TIM handle
-  * @retval None
-  */
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
-  /* USER CODE BEGIN Callback 0 */
-
-  /* USER CODE END Callback 0 */
-  if (htim->Instance == TIM6) {
-    HAL_IncTick();
-  }
-  /* USER CODE BEGIN Callback 1 */
-
-
-  /* USER CODE END Callback 1 */
 }
 
 /**

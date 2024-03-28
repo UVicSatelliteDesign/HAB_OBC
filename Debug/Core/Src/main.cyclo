@@ -1,0 +1,17 @@
+../Core/Src/main.c:118:10:getADCValue	1
+../Core/Src/main.c:141:7:getVoltage	1
+../Core/Src/main.c:156:7:getCurrent	1
+../Core/Src/main.c:165:6:cutBalloon	1
+../Core/Src/main.c:173:6:lowPowerMode	1
+../Core/Src/main.c:194:6:checkBattery	2
+../Core/Src/main.c:208:5:checkAltitude	3
+../Core/Src/main.c:222:6:checkLocation	6
+../Core/Src/main.c:257:5:main	1
+../Core/Src/main.c:339:6:SystemClock_Config	4
+../Core/Src/main.c:400:13:MX_ADC1_Init	4
+../Core/Src/main.c:468:13:MX_ETH_Init	2
+../Core/Src/main.c:517:13:MX_USART3_UART_Init	5
+../Core/Src/main.c:565:13:MX_USB_OTG_FS_PCD_Init	2
+../Core/Src/main.c:601:13:MX_GPIO_Init	1
+../Core/Src/main.c:673:6:startPollingLoop	4
+../Core/Src/main.c:711:6:Error_Handler	1
