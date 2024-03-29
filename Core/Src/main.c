@@ -34,11 +34,11 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define minVoltage 1065  //minimum voltage for LPM
-#define maxLongitude 0
-#define minLongitude 0
-#define maxLatitude 0
-#define minLatitude 0
-#define maxAltitude 0
+#define maxLongitude -124.8
+#define minLongitude -127.3
+#define maxLatitude 50.3
+#define minLatitude 49
+#define maxAltitude 30000
 #define VREF 3.3  // Reference voltage for s
 #define adcMaxValue 4095.0  // Maximum ADC value for 12-bit ADC
 #define sensitivity 0.185  // Sensitivity of ACS712ELCTR-05B in V/A
