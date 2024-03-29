@@ -33,16 +33,19 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define minVoltage 1065  //minimum voltage for LPM
+
+
+#define minVoltage 6.5  //minimum voltage for LPM
 #define maxLongitude -124.8
 #define minLongitude -127.3
 #define maxLatitude 50.3
 #define minLatitude 49
 #define maxAltitude 30000
 #define VREF 3.3  // Reference voltage for s
-#define adcMaxValue 4095.0  // Maximum ADC value for 12-bit ADC
-#define sensitivity 0.185  // Sensitivity of ACS712ELCTR-05B in V/A
-#define adcMaxVal 4096 // Max value for the ADC
+#define adcMaxValue 4096.0  // Maximum ADC value for 12-bit ADC
+#define maxCurrent 30000 // max current
+#define maxVoltage 25
+#define adcMaxValVolt 4096 // Max value for the ADC
 
 
 /* USER CODE END PD */
@@ -92,6 +95,16 @@ const osThreadAttr_t PollingLoop_attributes = {
 int descendFlag = 0;
 float prevAltitude = 0;
 
+Data data = {0};
+data.time = 1;
+data.volts = 2;
+data.altitude = 3;
+data.longitude = 4;
+data.latitude = 5;
+data.temp = 6;
+data.current = 7;
+
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -112,11 +125,49 @@ void startPollingLoop(void *argument);
 
 
 /**
- * @brief Gets the ADC value from the sensor.
+ * @brief Gets the ADC value from the current sensor.
  * @return The ADC value.
  */
-uint32_t getADCValue() {
-    uint32_t adcValue = 0;
+uint32_t getADCValueCurrent(){
+
+	 // Configure ADC for the current sensor connected to PC0
+	 ADC_ChannelConfTypeDef sConfig = {0};
+	 sConfig.Channel = ADC_CHANNEL_10;  // PC0
+	 sConfig.Rank = ADC_REGULAR_RANK_1;
+	 sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
+
+	 HAL_ADC_Init(&hadc1);
+
+	 // Start ADC conversion for PC0
+	 HAL_ADC_Start(&hadc1);
+
+	 // Wait for the conversion to complete
+	 HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
+
+	 // Read the ADC value
+	 uint32_t adcValue = HAL_ADC_GetValue(&hadc1);
+
+	 // Stop ADC
+	 HAL_ADC_Stop(&hadc1);
+
+	  return adcValue;
+
+}
+
+/**
+ * @brief Gets the ADC value from the voltage sensor.
+ * @return The ADC value.
+ */
+uint32_t getADCValueVoltage() {
+
+	// Configure ADC for the current sensor connected to PA3
+	//hadc1.Init.Channel = ADC_CHANNEL_3;
+
+    // Configure the ADC channel to read from PA3
+    ADC_ChannelConfTypeDef sConfig = {0};
+    sConfig.Channel = ADC_CHANNEL_3;  // PA3
+    sConfig.Rank = ADC_REGULAR_RANK_1;
+    sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
 
     // Start ADC conversion
     HAL_ADC_Start(&hadc1);
@@ -125,7 +176,7 @@ uint32_t getADCValue() {
     HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
 
     // Read the ADC value
-    adcValue = HAL_ADC_GetValue(&hadc1);
+    uint32_t adcValue = HAL_ADC_GetValue(&hadc1);
 
     // Stop ADC
     HAL_ADC_Stop(&hadc1);
@@ -140,9 +191,9 @@ uint32_t getADCValue() {
  */
 float getVoltage(){
 
-	float adcValue = getADCValue();
+	float adcValue = getADCValueVoltage();
 
-    float voltage = (adcValue * VREF) / adcMaxVal;
+    float voltage = (adcValue/adcMaxValue) * maxVoltage;
 
     return voltage;
 
@@ -154,8 +205,11 @@ float getVoltage(){
  * @return The current value.
  */
 float getCurrent(){
-	float voltage = getVoltage();
-	float current = voltage/sensitivity;
+
+	uint32_t adcValue = getADCValueCurrent();
+
+	float current = (adcValue / adcMaxValue) * maxCurrent;
+
 	return current;
 }
 
@@ -171,18 +225,26 @@ void cutBalloon(){
  * @brief Enters low power mode if battery voltage is low.
  */
 void lowPowerMode(){
-	float voltage = getVoltage();
-	float current = getCurrent();
-	float time = HAL_GetTick();
-	//longitude
-	//latitude
-	//altitude
-	//temp
 
-	//logData(voltage, current, time, longitude, latitude, altitude, temp)
+
 	cutBalloon();
-	while(1){
 
+
+	while(1){
+		//getting logging info
+		Data.time = HAL_GetTick();
+		Data.voltage = getVoltage();
+		Data.longitude = position.longitude;
+		Data.latitude = position.latitude;
+		Data.altitude = position.altitude;
+		Data.temp = position.temperature;
+		Data.current = getCurrent();
+
+		log_data(Data.time, Data.voltage, Data.longitude, Data.latitude, Data.altitude, Data.temp, Data.current);
+
+
+		//log_data(Data.time, Data.voltage, Data.longitude, Data.latitude, Data.altitude, Data.temp, Data.current);
+		HAL_Delay(60000);
 	}
 
 
@@ -208,6 +270,8 @@ void checkBattery(){
 int checkAltitude(float altitude){
 	if (altitude < prevAltitude){
 		descendFlag+= 1;
+	} else {
+		descendFlag = 0;
 	}
     if (altitude >= maxAltitude){
         return 1;
@@ -245,7 +309,7 @@ void checkLocation(void){
         }
     }
 
-    cutBalloon();
+    lowPowerMode();
 }
 
 /* USER CODE END 0 */
@@ -681,25 +745,36 @@ void startPollingLoop(void *argument)
 
 		//checking if 1 minute has passed
 		if(HAL_GetTick() - time1Min >= 60000){
+
+
+
 		time1Min = HAL_GetTick();
+
 
 		//checking battery percentage
 		checkBattery();
 
 		//checking current location
 		checkLocation();
-		//logData(longitude, latitude, altitude);
+
+		//getting logging info
+		Data.time = HAL_GetTick();
+		Data.voltage = getVoltage();
+		Data.longitude = position.longitude;
+		Data.latitude = position.latitude;
+		Data.altitude = position.altitude;
+		Data.temp = position.temperature;
+		Data.current = getCurrent();
+
+		log_data(Data.time, Data.voltage, Data.longitude, Data.latitude, Data.altitude, Data.temp, Data.current);
+
+		if(descendFlag >= 10){
+			lowPowerMode();
 		}
 
-		//checking if 10 minutes have passed
-		if(HAL_GetTick() - time10Min >= 600000){
-			time10Min = HAL_GetTick();
-
-			if(descendFlag >= 10){
-				lowPowerMode();
-			}
-
 		}
+
+
 	}
   /* USER CODE END 5 */
 }

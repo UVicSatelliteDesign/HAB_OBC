@@ -9,6 +9,10 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
+-include Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/subdir.mk
+-include Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/subdir.mk
+-include Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/subdir.mk
+-include Middlewares/Third_Party/FreeRTOS/Source/subdir.mk
 -include Drivers/STM32H7xx_HAL_Driver/Src/subdir.mk
 -include Core/Startup/subdir.mk
 -include Core/Src/subdir.mk
@@ -34,34 +38,34 @@ $(wildcard ../makefile.init) \
 $(wildcard ../makefile.targets) \
 
 
-BUILD_ARTIFACT_NAME := Weather Balloon
+BUILD_ARTIFACT_NAME := weatherballoon
 BUILD_ARTIFACT_EXTENSION := elf
 BUILD_ARTIFACT_PREFIX :=
 BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME)$(if $(BUILD_ARTIFACT_EXTENSION),.$(BUILD_ARTIFACT_EXTENSION),)
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXECUTABLES += \
-Weather\ Balloon.elf \
+weatherballoon.elf \
 
 MAP_FILES += \
-Weather\ Balloon.map \
+weatherballoon.map \
 
 SIZE_OUTPUT += \
 default.size.stdout \
 
 OBJDUMP_LIST += \
-Weather\ Balloon.list \
+weatherballoon.list \
 
 
 # All Target
 all: main-build
 
 # Main-build Target
-main-build: Weather\ Balloon.elf secondary-outputs
+main-build: weatherballoon.elf secondary-outputs
 
 # Tool invocations
-Weather\ Balloon.elf Weather\ Balloon.map: $(OBJS) $(USER_OBJS) C:\Users\tahaf\STM32CubeIDE\weatherballoon\STM32H743ZITX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "Weather Balloon.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"C:\Users\tahaf\STM32CubeIDE\weatherballoon\STM32H743ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Weather Balloon.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+weatherballoon.elf weatherballoon.map: $(OBJS) $(USER_OBJS) C:\Users\tahaf\STM32CubeIDE\workspace_1.13.2\weatherballoonTRUE\STM32H743ZITX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "weatherballoon.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"C:\Users\tahaf\STM32CubeIDE\workspace_1.13.2\weatherballoonTRUE\STM32H743ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="weatherballoon.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -70,14 +74,14 @@ default.size.stdout: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	@echo 'Finished building: $@'
 	@echo ' '
 
-Weather\ Balloon.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "Weather Balloon.list"
+weatherballoon.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "weatherballoon.list"
 	@echo 'Finished building: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) Weather\ Balloon.elf Weather\ Balloon.list Weather\ Balloon.map Weather\\ Balloon.elf default.size.stdout
+	-$(RM) default.size.stdout weatherballoon.elf weatherballoon.list weatherballoon.map
 	-@echo ' '
 
 secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)
