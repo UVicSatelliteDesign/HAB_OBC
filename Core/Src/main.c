@@ -38,7 +38,7 @@
 
 int descendFlag = 0;
 float prevAltitude = 0;
-
+int checkLowPowerMode=1;
 typedef struct {
     int longitude;
     int latitude;
@@ -145,13 +145,15 @@ void lowPowerMode(){
     while(1){
     	if(HAL_GetTick() - time10Min >= 600000){
     		time10Min = HAL_GetTick();
+    		checkLowPowerMode=0;
     		//log lpm data()
 
     	}
     }
+
 }
 
-int checkBattery(){
+void checkBattery(){
 	float batteryVoltage = 0;
 	int check=0;
 
@@ -159,7 +161,7 @@ int checkBattery(){
 			lowPowerMode();
 			check=1;
 		}
-	return check;
+
 }
 
 
@@ -648,7 +650,8 @@ void StartPollingLoop(void *argument)
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
 	int time1Min = 0;
-	
+	HAL_GPIO_WritePin(GPIOB, LD1_Pin, GPIO_PIN_SET);
+
 	for(;;){
 
 		if(HAL_GetTick() - time1Min >= 60000){
@@ -657,16 +660,16 @@ void StartPollingLoop(void *argument)
 		checkLocation();
 		if(descendFlag >= 10){
 
-				cutBalloon();
+				lowPowerMode();
 			}
 		//logData(longitude, latitude, altitude);
+		if(checkLowPowerMode==0){
+				HAL_GPIO_WritePin(GPIOB, LD1_Pin, GPIO_PIN_RESET);
+			}
 	}
-	if (checkBattery()==1){
-		HAL_GPIO_WritePin(GPIOB, LD1_Pin, GPIO_PIN_RESET);
-	}
-	else{
-		HAL_GPIO_WritePin(GPIOB, LD1_Pin, GPIO_PIN_SET);
-	}
+
+
+
 
 	
  }
