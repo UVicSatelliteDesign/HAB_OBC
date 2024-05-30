@@ -140,23 +140,29 @@ void cutBalloon(){
 
 void lowPowerMode(){
 	int time10Min = 0;
+	HAL_GPIO_WritePin(GPIOB, LD1_Pin, GPIO_PIN_RESET);
     //stopTransmitter();
 //	log_data();
     while(1){
     	if(HAL_GetTick() - time10Min >= 600000){
     		time10Min = HAL_GetTick();
+
     		//log lpm data()
 
     	}
     }
+
 }
 
 void checkBattery(){
 	float batteryVoltage = 0;
 
+
 		if (batteryVoltage <= powMin){
 			lowPowerMode();
+
 		}
+
 }
 
 
@@ -645,23 +651,26 @@ void StartPollingLoop(void *argument)
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
 	int time1Min = 0;
-	int time10Min = 0;
+	HAL_GPIO_WritePin(GPIOB, LD1_Pin, GPIO_PIN_SET);
+
 	for(;;){
 
 		if(HAL_GetTick() - time1Min >= 60000){
 		time1Min = HAL_GetTick();
 		checkBattery();
 		checkLocation();
-		//logData(longitude, latitude, altitude);
-	}
-
-	if(HAL_GetTick() - time10Min >= 600000){
-		time10Min = HAL_GetTick();
 		if(descendFlag >= 10){
-				cutBalloon();
+
+				lowPowerMode();
 			}
+		//logData(longitude, latitude, altitude);
 
 	}
+
+
+
+
+	
  }
   /* USER CODE END 5 */
 }
