@@ -155,11 +155,11 @@ void lowPowerMode(){
 
 void checkBattery(){
 	float batteryVoltage = 0;
-	int check=0;
+
 
 		if (batteryVoltage <= powMin){
 			lowPowerMode();
-			check=1;
+
 		}
 
 }
