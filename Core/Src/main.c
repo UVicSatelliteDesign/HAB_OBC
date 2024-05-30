@@ -38,7 +38,7 @@
 
 int descendFlag = 0;
 float prevAltitude = 0;
-int checkLowPowerMode=1;
+
 typedef struct {
     int longitude;
     int latitude;
@@ -140,12 +140,13 @@ void cutBalloon(){
 
 void lowPowerMode(){
 	int time10Min = 0;
+	HAL_GPIO_WritePin(GPIOB, LD1_Pin, GPIO_PIN_RESET);
     //stopTransmitter();
 //	log_data();
     while(1){
     	if(HAL_GetTick() - time10Min >= 600000){
     		time10Min = HAL_GetTick();
-    		checkLowPowerMode=0;
+
     		//log lpm data()
 
     	}
@@ -663,9 +664,7 @@ void StartPollingLoop(void *argument)
 				lowPowerMode();
 			}
 		//logData(longitude, latitude, altitude);
-		if(checkLowPowerMode==0){
-				HAL_GPIO_WritePin(GPIOB, LD1_Pin, GPIO_PIN_RESET);
-			}
+
 	}
 
 
