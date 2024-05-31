@@ -20,7 +20,6 @@
 #include "main.h"
 #include "string.h"
 #include "cmsis_os.h"
-#include "data_storage.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -34,7 +33,7 @@
 #define maxLatitude 0
 #define minLatitude 0
 #define maxAltitude 0
-
+#define voltageConversion 25/4095
 
 int descendFlag = 0;
 float prevAltitude = 0;
@@ -74,12 +73,14 @@ __attribute__((at(0x30000000))) ETH_DMADescTypeDef  DMARxDscrTab[ETH_RX_DESC_CNT
 __attribute__((at(0x30000200))) ETH_DMADescTypeDef  DMATxDscrTab[ETH_TX_DESC_CNT]; /* Ethernet Tx DMA Descriptors */
 
 #elif defined ( __GNUC__ ) /* GNU Compiler */
+
 ETH_DMADescTypeDef DMARxDscrTab[ETH_RX_DESC_CNT] __attribute__((section(".RxDecripSection"))); /* Ethernet Rx DMA Descriptors */
 ETH_DMADescTypeDef DMATxDscrTab[ETH_TX_DESC_CNT] __attribute__((section(".TxDecripSection")));   /* Ethernet Tx DMA Descriptors */
-
 #endif
 
 ETH_TxPacketConfig TxConfig;
+
+ADC_HandleTypeDef hadc1;
 
 ETH_HandleTypeDef heth;
 
@@ -119,6 +120,7 @@ static void MX_USART3_UART_Init(void);
 static void MX_USB_OTG_FS_PCD_Init(void);
 static void MX_ETH_Init(void);
 static void MX_SPI1_Init(void);
+static void MX_ADC1_Init(void);
 void StartPollingLoop(void *argument);
 void BatteryCallback(void *argument);
 void DescensionCallback(void *argument);
@@ -153,15 +155,34 @@ void lowPowerMode(){
     }
 
 }
+float getVoltage(){
+	uint32_t adc_val;
+	HAL_ADC_Start(&hadc1);
+	if(HAL_ADC_PollForConversion(&hadc1, 10)==HAL_OK){
+		adc_val=HAL_ADC_GetValue(&hadc1);
+
+	}
+	else {
+		return 0;
+	}
+	HAL_ADC_Stop(&hadc1);
+	adc_val*=voltageConversion;
+
+
+	return adc_val;
+
+
+}
 
 void checkBattery(){
 	float batteryVoltage = 0;
-
+	getVoltage();
 
 		if (batteryVoltage <= powMin){
 			lowPowerMode();
 
 		}
+
 
 }
 
@@ -177,6 +198,7 @@ int checkAltitude(float altitude){
     prevAltitude = altitude;
     return 0;
 }
+
 
 
 void checkLocation(void){
@@ -212,6 +234,7 @@ void checkLocation(void){
   */
 int main(void)
 {
+
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
@@ -239,6 +262,7 @@ int main(void)
   MX_USB_OTG_FS_PCD_Init();
   MX_ETH_Init();
   MX_SPI1_Init();
+  MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
   getLocation(&hspi1, &position);
   HAL_SPI_RegisterCallback(&hspi1, HAL_SPI_RX_COMPLETE_CB_ID, getLocationClbk);
@@ -286,6 +310,7 @@ int main(void)
   osKernelStart();
 
   /* We should never get here as control is now taken by the scheduler */
+
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
@@ -355,6 +380,74 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+}
+
+/**
+  * @brief ADC1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_ADC1_Init(void)
+{
+
+  /* USER CODE BEGIN ADC1_Init 0 */
+
+  /* USER CODE END ADC1_Init 0 */
+
+  ADC_MultiModeTypeDef multimode = {0};
+  ADC_ChannelConfTypeDef sConfig = {0};
+
+  /* USER CODE BEGIN ADC1_Init 1 */
+
+  /* USER CODE END ADC1_Init 1 */
+
+  /** Common config
+  */
+  hadc1.Instance = ADC1;
+  hadc1.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV2;
+  hadc1.Init.Resolution = ADC_RESOLUTION_12B;
+  hadc1.Init.ScanConvMode = ADC_SCAN_DISABLE;
+  hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+  hadc1.Init.LowPowerAutoWait = DISABLE;
+  hadc1.Init.ContinuousConvMode = DISABLE;
+  hadc1.Init.NbrOfConversion = 1;
+  hadc1.Init.DiscontinuousConvMode = DISABLE;
+  hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+  hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
+  hadc1.Init.ConversionDataManagement = ADC_CONVERSIONDATA_DR;
+  hadc1.Init.Overrun = ADC_OVR_DATA_PRESERVED;
+  hadc1.Init.LeftBitShift = ADC_LEFTBITSHIFT_NONE;
+  hadc1.Init.OversamplingMode = DISABLE;
+  if (HAL_ADC_Init(&hadc1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure the ADC multi-mode
+  */
+  multimode.Mode = ADC_MODE_INDEPENDENT;
+  if (HAL_ADCEx_MultiModeConfigChannel(&hadc1, &multimode) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure Regular Channel
+  */
+  sConfig.Channel = ADC_CHANNEL_15;
+  sConfig.Rank = ADC_REGULAR_RANK_1;
+  sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
+  sConfig.SingleDiff = ADC_SINGLE_ENDED;
+  sConfig.OffsetNumber = ADC_OFFSET_NONE;
+  sConfig.Offset = 0;
+  sConfig.OffsetSignedSaturation = DISABLE;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN ADC1_Init 2 */
+
+  /* USER CODE END ADC1_Init 2 */
+
 }
 
 /**
@@ -550,9 +643,6 @@ static void MX_DMA_Init(void)
   /* DMA1_Stream0_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Stream0_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA1_Stream0_IRQn);
-  /* DMAMUX1_OVR_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMAMUX1_OVR_IRQn, 5, 0);
-  HAL_NVIC_EnableIRQ(DMAMUX1_OVR_IRQn);
 
 }
 
@@ -650,28 +740,10 @@ void StartPollingLoop(void *argument)
 {
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
-	int time1Min = 0;
-	HAL_GPIO_WritePin(GPIOB, LD1_Pin, GPIO_PIN_SET);
-
-	for(;;){
-
-		if(HAL_GetTick() - time1Min >= 60000){
-		time1Min = HAL_GetTick();
-		checkBattery();
-		checkLocation();
-		if(descendFlag >= 10){
-
-				lowPowerMode();
-			}
-		//logData(longitude, latitude, altitude);
-
-	}
-
-
-
-
-	
- }
+  for(;;)
+  {
+    osDelay(1);
+  }
   /* USER CODE END 5 */
 }
 
