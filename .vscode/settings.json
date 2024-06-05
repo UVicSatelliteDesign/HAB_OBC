@@ -1,5 +1,6 @@
 {
     "files.associations": {
         "hawb_aprs.h": "c"
-    }
+    },
+    "python.analysis.typeCheckingMode": "basic"
 }

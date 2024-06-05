@@ -1,6 +1,6 @@
 import serial
 
-def print():
+def receive():
     try:
         ser=serial.Serial(port="COM3", baudrate=9600)
         if ser.in_waiting!=0:
