@@ -247,10 +247,10 @@ void checkLocation(void){
 
     cutBalloon();
 }
-void print(char data[1200]){
+void print(char data[21]){
 	HAL_UART_Transmit_DMA(&huart4, data, strlen(data));}
-void read_serial(char data[1200]){
-	HAL_UART_Receive_DMA(&huart4, data, 1200);
+void read_serial(char data[101]){
+	HAL_UART_Receive_DMA(&huart4, data, 100);
 }
 // I shall be assuming 1200 bytes because the baud rate is 9600
 // This means that the file can run only for a second.
