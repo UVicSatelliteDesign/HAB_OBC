@@ -31,7 +31,7 @@ void erase_bank() {
   }
 }
 
-void log_data(uint32_t *data) {
+void write_data(uint32_t *data) {
   assert(data != NULL);
 
   // Do not write more data if the end of the flash memory has been reached
@@ -68,7 +68,7 @@ void test_log_data() {
 
   int i = cur_flash_addr;
 
-  log_data((uint32_t *)(&data));
+  write_data((uint32_t *)(&data));
 
   int count = 0;
   for (; i < cur_flash_addr; i += 4) {
@@ -109,8 +109,8 @@ void test_read_data(UART_HandleTypeDef huart3) {
   data.latitude = 4;
   data.longitude = 3;
 
-  log_data((uint32_t *)(&data));
-  log_data((uint32_t *)(&data));
+  write_data((uint32_t *)(&data));
+  write_data((uint32_t *)(&data));
 
   read_data(huart3);
 }

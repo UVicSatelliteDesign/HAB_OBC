@@ -41,7 +41,7 @@ void erase_bank();
  * @param data The address of the struct that holds the data to write. Must
  * point to 32 bytes of contiguous memory.
  */
-void log_data(uint32_t *data);
+void write_data(uint32_t *data);
 
 /**
  * @brief Read all data from user flash memory and send over UART.

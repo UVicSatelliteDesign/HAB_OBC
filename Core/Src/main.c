@@ -20,6 +20,8 @@
 #include "main.h"
 #include "string.h"
 #include "cmsis_os.h"
+#include "unistd.h"
+#include "data_storage.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -36,9 +38,13 @@
 #define voltageConversion 25/4095
 #define currentConversion 30/4095
 
+#define logPeriod	60000	// Period for logging data, in milliseconds.
+#define maxLoggingTime 28800000	// Max total time to be logging data, in milliseconds
+
 
 int descendFlag = 0;
 float prevAltitude = 0;
+uint32_t currTime_ms = 0;
 
 typedef struct {
     int longitude;
@@ -133,14 +139,36 @@ void BatteryCallback(void *argument);
 void DescensionCallback(void *argument);
 
 /* USER CODE BEGIN PFP */
-
+int getVoltage();
+int getCurrent();
+void checkBattery();
+int checkAltitude(float altitude);
+void checkLocation();
+void fetchData(Data* data);
+void logData();
+void cutBalloon();
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void fetchData(Data* data){
+	data->time = currTime_ms;
+	data->volts = getVoltage();
+	data->longitude = position.longitude;
+	data->latitude = position.latitude;
+	data->altitude = position.altitude;
+	//data.temperature = getTemperature();
+	data->temperature = 0; //replace with above line when temperature function is implemented
+	data->current = getCurrent();
+}
 
-
-
+void logData(){
+		if(currTime_ms < maxLoggingTime){
+			Data data;
+			fetchData(&data);
+			write_data((uint32_t*)&data);
+		}
+}
 
 void cutBalloon(){
 
@@ -156,69 +184,65 @@ void cutBalloon(){
 }
 
 void lowPowerMode(){
-	int time10Min = 0;
+	uint32_t lastTickCount_ms = 0;
 	HAL_GPIO_WritePin(GPIOB, LD1_Pin, GPIO_PIN_RESET);
     //stopTransmitter();
-//	log_data();
     while(1){
-    	if(HAL_GetTick() - time10Min >= 600000){
-    		time10Min = HAL_GetTick();
+    	uint32_t elapsed_time = (uint32_t)(HAL_GetTick() - lastTickCount_ms);
 
-    		//log lpm data()
+    	if(elapsed_time >= logPeriod){
+    		lastTickCount_ms = HAL_GetTick();
+    		currTime_ms += elapsed_time;
 
+    		logData();
     	}
-    }
-
+	}
 }
+
 int getVoltage(){
 	uint32_t adc_val;
 	HAL_ADC_Start(&hadc1);
+
 	if(HAL_ADC_PollForConversion(&hadc1, 10)==HAL_OK){
+
 		adc_val=HAL_ADC_GetValue(&hadc1);
 
-	}
-	else {
+	} else {
 		return 0;
 	}
+
 	HAL_ADC_Stop(&hadc1);
 	adc_val*=voltageConversion;
 
 
 	return adc_val;
-
-
 }
+
 int getCurrent(){
 	uint32_t adc_curr;
 	HAL_ADC_Start(&hadc2);
+
 	if(HAL_ADC_PollForConversion(&hadc2, 10)==HAL_OK){
+
 			adc_curr=HAL_ADC_GetValue(&hadc2);
 
-		}
-		else {
-			return 0;
-		}
-		HAL_ADC_Stop(&hadc2);
-		adc_curr*=currentConversion;
+	} else {
+		return 0;
+	}
 
+	HAL_ADC_Stop(&hadc2);
+	adc_curr*=currentConversion;
 
-		return adc_curr;
-
-
+	return adc_curr;
 }
 
 void checkBattery(){
 	float batteryVoltage = getVoltage();
 
-
 		if (batteryVoltage <= powMin){
 			lowPowerMode();
-
 		}
-
 }
-
-
 
 int checkAltitude(float altitude){
 	if (altitude < prevAltitude){
@@ -231,24 +255,12 @@ int checkAltitude(float altitude){
     return 0;
 }
 
-
 void checkLocation(void){
+	getLocation(&hspi1, &position);
 
-    // getLongitude(), getLatitude(), getAltitude(), and locationDisplay() are placeholders
-   // int longitude = function.longitude();
-   // int latitude = function.latitude();
-   // int altitude = function.altitude();
-
-    float longitude = 0;
-    float latitude = 0;
-    float altitude = 0;
-
-
-
-
-    if (longitude < maxLongitude && longitude > minLongitude){
-        if(latitude < maxLatitude && latitude > minLatitude){
-            if(checkAltitude(altitude) == 1){
+    if (position.longitude < maxLongitude && position.longitude > minLongitude){
+        if(position.latitude < maxLatitude && position.latitude > minLatitude){
+            if(checkAltitude(position.altitude) == 1){
                 cutBalloon();
             }
             return;
@@ -285,6 +297,7 @@ int main(void)
 
   /* USER CODE BEGIN Init */
 
+
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -310,6 +323,10 @@ int main(void)
   /* USER CODE BEGIN 2 */
   getLocation(&hspi1, &position);
   HAL_SPI_RegisterCallback(&hspi1, HAL_SPI_RX_COMPLETE_CB_ID, getLocationClbk);
+
+  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+  read_data(huart3);
+  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -898,7 +915,9 @@ static void MX_GPIO_Init(void)
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
   if(GPIO_Pin == GPIO_PIN_13) {
-    read_data(huart3);
+	HAL_GPIO_WritePin(GPIOB, LD3_Pin, GPIO_PIN_SET);
+	erase_bank();
+    HAL_GPIO_WritePin(GPIOB, LD3_Pin, GPIO_PIN_RESET);
   } else {
       __NOP();
   }
@@ -918,30 +937,28 @@ void StartPollingLoop(void *argument)
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
 	RetargetInit(&huart3);
-	int time1Min = 0;
+	uint32_t lastTime_ms = 0;
 	HAL_GPIO_WritePin(GPIOB, LD1_Pin, GPIO_PIN_SET);
 
 
 
 	for(;;){
+		uint32_t elapsedTime = HAL_GetTick() - lastTime_ms;
 
-		if(HAL_GetTick() - time1Min >= 60000){
-		time1Min = HAL_GetTick();
-		checkBattery();
-		checkLocation();
+		if(elapsedTime >= 60000){
+			currTime_ms += elapsedTime;
+			lastTime_ms = HAL_GetTick();
+
+			checkBattery();
+			checkLocation();
+
 			if(descendFlag >= 10){
-
 				lowPowerMode();
 			}
-		//logData(longitude, latitude, altitude);
 
+			logData();
 		}
-
-
 	}
-
-	
-
   /* USER CODE END 5 */
 }
 
