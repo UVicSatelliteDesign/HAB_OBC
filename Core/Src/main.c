@@ -141,8 +141,14 @@ void DescensionCallback(void *argument);
 
 
 void cutBalloon(){
+	int time15sec = 0;
 	//set to pin to high HAL FUNCTION WITH PIN
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);
+	__disable_irq();
+	while(HAL_GetTick() - time15sec < 15000){
+
+		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);
+	}
+	__enable_irq();
 }
 
 void lowPowerMode(){
