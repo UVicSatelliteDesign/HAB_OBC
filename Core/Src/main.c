@@ -20,6 +20,7 @@
 #include "main.h"
 #include "string.h"
 #include "cmsis_os.h"
+#include "unistd.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -141,13 +142,15 @@ void DescensionCallback(void *argument);
 
 
 void cutBalloon(){
-	int time15sec = 0;
-	//set to pin to high HAL FUNCTION WITH PIN
-	__disable_irq();
-	while(HAL_GetTick() - time15sec < 15000){
 
-		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);
+	//set to pin to high HAL FUNCTION WITH PIN
+
+	__disable_irq();
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);
+	for(int i=0;i<64*1000*15000;i++){
+		int c=0;
 	}
+
 	__enable_irq();
 }
 
