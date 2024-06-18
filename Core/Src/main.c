@@ -147,10 +147,10 @@ void cutBalloon(){
 
 	__disable_irq();
 	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);
-	for(int i=0;i<64*1000*15000;i++){
-		int c=0;
+	for(int i=0;i<64000000*15;i++){
+		__NOP();
 	}
-
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_RESET);
 	__enable_irq();
 }
 
