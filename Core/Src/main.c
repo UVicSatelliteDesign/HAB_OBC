@@ -25,7 +25,7 @@
 /* USER CODE BEGIN Includes */
 
 #include <stdio.h>
-
+#include "retarget.h"
 
 #define powMin 10  // Replace with the actual power threshold value
 #define maxLongitude 0
@@ -236,6 +236,8 @@ void checkLocation(void){
     float altitude = 0;
 
 
+
+
     if (longitude < maxLongitude && longitude > minLongitude){
         if(latitude < maxLatitude && latitude > minLatitude){
             if(checkAltitude(altitude) == 1){
@@ -247,13 +249,12 @@ void checkLocation(void){
 
     cutBalloon();
 }
-void print(char data[21]){
-	HAL_UART_Transmit_DMA(&huart4, data, strlen(data));}
-void read_serial(char data[101]){
-	HAL_UART_Receive_DMA(&huart4, data, 100);
-}
-// I shall be assuming 1200 bytes because the baud rate is 9600
-// This means that the file can run only for a second.
+
+//The functions needs to have a parameter
+
+
+
+
 
 
 /* USER CODE END 0 */
@@ -428,13 +429,13 @@ void PeriphCommonClock_Config(void)
   /** Initializes the peripherals clock
   */
   PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_ADC;
-  PeriphClkInitStruct.PLL2.PLL2M = 32;
-  PeriphClkInitStruct.PLL2.PLL2N = 129;
+  PeriphClkInitStruct.PLL2.PLL2M = 1;
+  PeriphClkInitStruct.PLL2.PLL2N = 19;
   PeriphClkInitStruct.PLL2.PLL2P = 2;
   PeriphClkInitStruct.PLL2.PLL2Q = 2;
   PeriphClkInitStruct.PLL2.PLL2R = 2;
   PeriphClkInitStruct.PLL2.PLL2RGE = RCC_PLL2VCIRANGE_3;
-  PeriphClkInitStruct.PLL2.PLL2VCOSEL = RCC_PLL2VCOWIDE;
+  PeriphClkInitStruct.PLL2.PLL2VCOSEL = RCC_PLL2VCOMEDIUM;
   PeriphClkInitStruct.PLL2.PLL2FRACN = 0;
   PeriphClkInitStruct.AdcClockSelection = RCC_ADCCLKSOURCE_PLL2;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
@@ -465,7 +466,7 @@ static void MX_ADC1_Init(void)
   /** Common config
   */
   hadc1.Instance = ADC1;
-  hadc1.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV1;
+  hadc1.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV2;
   hadc1.Init.Resolution = ADC_RESOLUTION_16B;
   hadc1.Init.ScanConvMode = ADC_SCAN_DISABLE;
   hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
@@ -532,7 +533,7 @@ static void MX_ADC2_Init(void)
   /** Common config
   */
   hadc2.Instance = ADC2;
-  hadc2.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV1;
+  hadc2.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV2;
   hadc2.Init.Resolution = ADC_RESOLUTION_16B;
   hadc2.Init.ScanConvMode = ADC_SCAN_DISABLE;
   hadc2.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
@@ -908,11 +909,12 @@ void StartPollingLoop(void *argument)
 {
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
+	RetargetInit(&huart3);
 	int time1Min = 0;
 	HAL_GPIO_WritePin(GPIOB, LD1_Pin, GPIO_PIN_SET);
 
 	for(;;){
-
+		printf("Enter");
 		if(HAL_GetTick() - time1Min >= 60000){
 		time1Min = HAL_GetTick();
 		checkBattery();

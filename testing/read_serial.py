@@ -1,10 +1,10 @@
 import serial
-ser=serial.Serial(port="COM3", baudrate=9600)
+ser=serial.Serial(port="COM3", baudrate=115200)
 def receive():
     try:
         
-        if ser.in_waiting!=0:
-            print(ser.readline().decode())
+       while True:
+            print(ser.readline().decode()) 
     except:
         print(Exception)
     finally:
@@ -13,10 +13,11 @@ def send():
     try:
         
         inp=input("Enter string to send")
-        ser.write(inp.encode())
+        while True:
+            ser.write(inp.encode())
     except:
         print(Exception)
     finally:
         ser.close()
-while True:
-    print(ser.readline().decode())
+
+
