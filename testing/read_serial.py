@@ -1,23 +1,26 @@
 import serial
-ser=serial.Serial(port="COM3", baudrate=115200)
-def receive():
-    try:
-        
-       while True:
-            print(ser.readline().decode()) 
-    except:
-        print(Exception)
-    finally:
-        ser.close()
-def send():
-    try:
-        
-        inp=input("Enter string to send")
-        while True:
-            ser.write(inp.encode())
-    except:
-        print(Exception)
-    finally:
-        ser.close()
 
+from signal import signal, SIGINT
+from sys import exit
+ser=serial.Serial(port="COM3", baudrate=115200)
+def handler(signal_received, frame):
+    # Handle any cleanup here
+    print('SIGINT or CTRL-C detected. Exiting gracefully')
+    
+    ser.close()
+    exit(0)
+
+def receive():
+    
+        
+    print(ser.read().decode(), end="")
+    
+        
+    
+
+
+
+signal(SIGINT, handler)   
+while True:
+    receive()
 

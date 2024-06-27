@@ -913,8 +913,11 @@ void StartPollingLoop(void *argument)
 	int time1Min = 0;
 	HAL_GPIO_WritePin(GPIOB, LD1_Pin, GPIO_PIN_SET);
 
+
+
 	for(;;){
-		printf("Enter");
+
+
 		if(HAL_GetTick() - time1Min >= 60000){
 		time1Min = HAL_GetTick();
 		checkBattery();
