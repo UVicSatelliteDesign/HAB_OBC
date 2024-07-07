@@ -2,7 +2,7 @@ import serial
 
 from signal import signal, SIGINT
 from sys import exit
-ser=serial.Serial(port="COM3", baudrate=115200)
+ser=serial.Serial(port="/dev/ttyACM0", baudrate=115200)
 def handler(signal_received, frame):
     # Handle any cleanup here
     print('SIGINT or CTRL-C detected. Exiting gracefully')

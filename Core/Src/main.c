@@ -917,7 +917,6 @@ void StartPollingLoop(void *argument)
 
 	for(;;){
 
-
 		if(HAL_GetTick() - time1Min >= 60000){
 		time1Min = HAL_GetTick();
 		checkBattery();
@@ -934,8 +933,9 @@ void StartPollingLoop(void *argument)
 
 
 	
- }
+
   /* USER CODE END 5 */
+}
 }
 
 /* BatteryCallback function */
