@@ -929,16 +929,16 @@ void StartPollingLoop(void *argument)
 		time1Min = HAL_GetTick();
 		checkBattery();
 		checkLocation();
-		if(descendFlag >= 10){
+			if(descendFlag >= 10){
 
 				lowPowerMode();
 			}
 		//logData(longitude, latitude, altitude);
 
+		}
+
+
 	}
-
-
-
 
 	
 
