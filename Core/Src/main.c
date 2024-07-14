@@ -28,6 +28,8 @@
 
 #include <stdio.h>
 #include "retarget.h"
+#include <stdbool.h>
+
 
 #define powMin 10  // Replace with the actual power threshold value
 #define maxLongitude 0
@@ -44,7 +46,7 @@
 
 int descendFlag = 0;
 float prevAltitude = 0;
-uint32_t currTime_ms = 0;
+bool isLoggingTimeout = false;
 
 typedef struct {
     int longitude;
@@ -152,7 +154,7 @@ void cutBalloon();
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 void fetchData(Data* data){
-	data->time = currTime_ms;
+	data->time = HAL_GetTick();
 	data->volts = getVoltage();
 	data->longitude = position.longitude;
 	data->latitude = position.latitude;
@@ -163,10 +165,12 @@ void fetchData(Data* data){
 }
 
 void logData(){
-		if(currTime_ms < maxLoggingTime){
+		if(HAL_GetTick() < maxLoggingTime && !isLoggingTimeout){
 			Data data;
 			fetchData(&data);
 			write_data((uint32_t*)&data);
+		} else {
+			isLoggingTimeout = true;
 		}
 }
 
@@ -188,11 +192,8 @@ void lowPowerMode(){
 	HAL_GPIO_WritePin(GPIOB, LD1_Pin, GPIO_PIN_RESET);
     //stopTransmitter();
     while(1){
-    	uint32_t elapsed_time = (uint32_t)(HAL_GetTick() - lastTickCount_ms);
-
-    	if(elapsed_time >= logPeriod){
+    	if((uint32_t)(HAL_GetTick() - lastTickCount_ms) >= logPeriod){
     		lastTickCount_ms = HAL_GetTick();
-    		currTime_ms += elapsed_time;
 
     		logData();
     	}
@@ -940,13 +941,8 @@ void StartPollingLoop(void *argument)
 	uint32_t lastTime_ms = 0;
 	HAL_GPIO_WritePin(GPIOB, LD1_Pin, GPIO_PIN_SET);
 
-
-
 	for(;;){
-		uint32_t elapsedTime = HAL_GetTick() - lastTime_ms;
-
-		if(elapsedTime >= 60000){
-			currTime_ms += elapsedTime;
+		if((uint32_t)(HAL_GetTick() - lastTime_ms) >= logPeriod){
 			lastTime_ms = HAL_GetTick();
 
 			checkBattery();
