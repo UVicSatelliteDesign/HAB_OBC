@@ -23,7 +23,30 @@ The file that runs the entire program is [main.c](./Core/Src/main.c).
 As a method of further understanding the code, tracing backwards starting from the [StartPollingLoop](./Core/Src/main.c#L936) function assists in simplifying the flow of the code.
 
 ```c
-./Core/Src/main.c#L936-L959
+void StartPollingLoop(void *argument)
+{
+  /* USER CODE BEGIN 5 */
+  /* Infinite loop */
+	RetargetInit(&huart3);
+	uint32_t lastTime_ms = 0;
+	HAL_GPIO_WritePin(GPIOB, LD1_Pin, GPIO_PIN_SET);
+
+	for(;;){
+		if((uint32_t)(HAL_GetTick() - lastTime_ms) >= logPeriod){
+			lastTime_ms = HAL_GetTick();
+
+			checkBattery();
+			checkLocation();
+
+			if(descendFlag >= 10){
+				lowPowerMode();
+			}
+
+			logData();
+		}
+	}
+  /* USER CODE END 5 */
+}
 ```
 #### Explanation
 The function includes an infinite loop that runs multiple functions upon satisfaction of different conditions. These include [checkBattery](./Core/Src/main.c#L240-L246) , [checkLocation](./Core/Src/main.c#L259-L272) and [lowpowerMode](./Core/Src/main.c#L190-L201). The only function void of any condition is [logData](./Core/Src/main.c#L167-L175).
