@@ -21,9 +21,10 @@ This OBC is used for controlling the actions based on circumstances during the b
 The file that runs the entire program is [main.c](./Core/Src/main.c).
 > [Main.c](./Core/Src/main.c) is run based on the function [StartPollingLoop](./Core/Src/main.c#L936). 
 As a method of further understanding the code, tracing backwards starting from the [StartPollingLoop](./Core/Src/main.c#L936) function assists in simplifying the flow of the code.
-'''c
+
+```c
 ./Core/Src/main.c#L936-L959
-'''
+```
 #### Explanation
 The function includes an infinite loop that runs multiple functions upon satisfaction of different conditions. These include [checkBattery](./Core/Src/main.c#L240-L246) , [checkLocation](./Core/Src/main.c#L259-L272) and [lowpowerMode](./Core/Src/main.c#L190-L201). The only function void of any condition is [logData](./Core/Src/main.c#L167-L175).
 
