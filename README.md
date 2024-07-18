@@ -1,15 +1,21 @@
 # HIGH ALTIBUTE BALLOON: ONBOARD COMPUTER
-The OBC for the HAB is a firmware system built on a STM32 microcontroller.
+The Onboard Computer(OBC) for the High-Altitude Balloon(HAB) is a firmware system built on a STM32 microcontroller.
 
 ## Overview
-### Description
-The high aitude balloon acts as a simulation tool to replicate the satellite's systems under similar environment.
-### Mission and Goals
+### Mission
+The HAB acts as a simulation tool to replicate the satellite's systems under similar environments.
+### Goals
+The goal of the HAB is to test the:
+- Communication Systems
+- SatNogs
+- GroundStation System
+- Design Cycle
+
 
 ## Table of Contents
 - [Overview](#overview)
-  - [Description](#description)
-  - [Mission and Goals](#mission-and-goals)
+  - [Mission](#mission)
+  - [Goals](#goals)
 - [Directory Structure](#directory-structure)
 - [Usage](#usage)
 - [License](#license)
@@ -26,40 +32,12 @@ The high aitude balloon acts as a simulation tool to replicate the satellite's s
 - All header files included here.
 - Header Files incude data structures and function definitions.
 ## Usage 
-This project contains the firmware for an embedded system designed to monitor battery status, location, and other parameters. The system logs data periodically and can enter a low power mode to conserve energy. It utilizes UART for communication and ADC for voltage measurements.
+This project contains the firmware for an embedded system designed to monitor battery status, location, and other parameters. The system logs data periodically and can enter a low power mode to conserve energy. It utilizes Universal Asynchronous Receiver Transmitter (UART) for communication and Analog-to-Digital Converter (ADC) for sensor measurements.
 
 ### Main file
 The file that runs the entire program is `main.c`.
-> `Main.c` is run based on the function `StartPollingLoop`. 
+> `Main.c` is run based on the function [`StartPollingLoop`](.Core/Src/main.c#L936-L959). 
 
-
-```c
-void StartPollingLoop(void *argument)
-{
-  /* USER CODE BEGIN 5 */
-  /* Infinite loop */
-	RetargetInit(&huart3);
-	uint32_t lastTime_ms = 0;
-	HAL_GPIO_WritePin(GPIOB, LD1_Pin, GPIO_PIN_SET);
-
-	for(;;){
-		if((uint32_t)(HAL_GetTick() - lastTime_ms) >= logPeriod){
-			lastTime_ms = HAL_GetTick();
-
-			checkBattery();
-			checkLocation();
-
-			if(descendFlag >= 10){
-				lowPowerMode();
-			}
-
-			logData();
-		}
-	}
-  /* USER CODE END 5 */
-}
-```
-#### Explanation
 - **[checkBattery](./Core/Src/main.c#L240-L246)**: Checks the battery voltage using the `getVoltage` function. If the voltage is below a predetermined value, it initiates the `lowpowerMode` function.
 - **[getVoltage](./Core/Src/main.c#L203-L220)**: Reads the value from a specific ADC pin and converts it to a voltage value using a macro.
 - **[checkLocation](./Core/Src/main.c#L259-L272)**: Utilizes the `getLocation` function to read the latitude and longitude, and the `checkAltitude` function to read the altitude. If certain conditions are met, the `cutBalloon` function is called.
@@ -75,7 +53,7 @@ void StartPollingLoop(void *argument)
 This code provides functionality to erase, write, and read data from the flash memory of an embedded system. The code is structured with the following functions:
 
 - **[erase_bank()](./Core/Src/data_storage.c#L3-L32)**: Erases a specific bank of flash memory.
-- **[write_Data](./Core/Src/data_storage.c#L34-L50)**: Writes data to flash memory.
+- **[write_Data()](./Core/Src/data_storage.c#L34-L50)**: Writes data to flash memory.
 - **[read_data()](./Core/Src/data_storage.c#L52-L57)**: Reads data from flash memory and transmits it over UART.
 - **[test_log_data()](./Core/Src/data_storage.c#L59C1-L100C2)**: Tests the logging of data into flash memory.
 - **[test_read_data()](./Core/Src/data_storage.c#L102-L116)**: Tests reading data from flash memory and transmitting it over UART.
