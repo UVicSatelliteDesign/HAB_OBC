@@ -10,6 +10,7 @@ The OBC for the HAB is a firmware system built on a STM32 microcontroller.
 - [Overview](#overview)
   - [Description](#description)
   - [Mission and Goals](#mission-and-goals)
+- [Directory Structure](#directory-structure)
 - [Usage](#usage)
 - [License](#license)
 - [Acknowledgements](#acknowledgements)
@@ -18,13 +19,15 @@ The OBC for the HAB is a firmware system built on a STM32 microcontroller.
 - *main.c*: Contains the main control logic and core functions.
 - *HAWB_APRS.c*: Contains functions related to location and altitude.
 - *data_storage.c*: Contains functions for writing data to flash memory.
-
+- *retarget.c*: Contains functions related to serial communication on the boards
+### testing/:
+- *read_serial.py*: Contains functions for serial communication through terminal
 ## Usage 
 This project contains the firmware for an embedded system designed to monitor battery status, location, and other parameters. The system logs data periodically and can enter a low power mode to conserve energy. It utilizes UART for communication and ADC for voltage measurements.
 
 ### Main file
-The file that runs the entire program is [main.c](./Core/Src/main.c).
-> [Main.c](./Core/Src/main.c) is run based on the function [StartPollingLoop](./Core/Src/main.c#L936). 
+The file that runs the entire program is [`main.c`](./Core/Src/main.c).
+> [`Main.c`](./Core/Src/main.c) is run based on the function [`StartPollingLoop`](./Core/Src/main.c#L936). 
 
 
 ```c
@@ -90,6 +93,6 @@ This file contains functions for handling APRS (Automatic Packet Reporting Syste
   - Helper function to read big endian 4-byte data types.
   
 ### Retarget
-The retarget file is meant to allow us to use C functions printf and scanf directly in the terminal [[1]](#acknowledgements). This along with the file [read_serial](./testing/read_serial.py) allows us to send and recieve serial communication through the terminal and the board.
+The [`retarget file`](./Core/Src/retarget.c)  is meant to allow us to use C functions printf and scanf directly in the terminal [[1]](#acknowledgements). This along with the file [`read_serial`](./testing/read_serial.py) allows us to send and recieve serial communication through the terminal and the board.
 ## Acknowledgements
-[[1] S. Hymel, “How to use printf on STM32,” Shawn Hymel, https://shawnhymel.com/1873/how-to-use-printf-on-stm32/](./Core/Src/retarget.c) 
+[1] S. Hymel, “How to use printf on STM32,” Shawn Hymel, https://shawnhymel.com/1873/how-to-use-printf-on-stm32/
