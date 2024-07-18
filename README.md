@@ -3,7 +3,7 @@ The OBC for the HAB is a firmware system built on a STM32 microcontroller.
 
 ## Overview
 ### Description
-
+The high aitude balloon acts as a simulation tool to replicate the satellite's systems under similar environment.
 ### Mission and Goals
 
 ## Table of Contents
@@ -22,6 +22,9 @@ The OBC for the HAB is a firmware system built on a STM32 microcontroller.
 - *retarget.c*: Contains functions related to serial communication on the boards
 ### testing/:
 - *read_serial.py*: Contains functions for serial communication through terminal
+### Core/Inc/:
+- All header files included here.
+- Header Files incude data structures and function definitions.
 ## Usage 
 This project contains the firmware for an embedded system designed to monitor battery status, location, and other parameters. The system logs data periodically and can enter a low power mode to conserve energy. It utilizes UART for communication and ADC for voltage measurements.
 
