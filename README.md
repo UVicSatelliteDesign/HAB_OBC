@@ -1,17 +1,6 @@
 # HIGH ALTIBUTE BALLOON: ONBOARD COMPUTER
 The Onboard Computer(OBC) for the High-Altitude Balloon(HAB) is a firmware system built on a STM32 microcontroller.
 
-## Overview
-### Mission
-The HAB acts as a simulation tool to replicate the satellite's systems under similar environments.
-### Goals
-The goal of the HAB is to test the:
-- Communication Systems
-- SatNogs
-- GroundStation System
-- Design Cycle
-
-
 ## Table of Contents
 - [Overview](#overview)
   - [Mission](#mission)
@@ -20,6 +9,16 @@ The goal of the HAB is to test the:
 - [Usage](#usage)
 - [License](#license)
 - [Acknowledgements](#acknowledgements)
+
+## Overview
+### Mission
+The HAB acts as a simulation tool to replicate the satellite's systems under similar environments.
+### Goals
+The goal of the HAB is to gain experience in :
+- Communication Systems
+- GroundStation System
+- Iterative Software Design 
+
 ## Directory Structure
 ### Core/Src/:
 - *main.c*: Contains the main control logic and core functions.
