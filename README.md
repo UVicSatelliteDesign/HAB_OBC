@@ -26,8 +26,8 @@ The OBC for the HAB is a firmware system built on a STM32 microcontroller.
 This project contains the firmware for an embedded system designed to monitor battery status, location, and other parameters. The system logs data periodically and can enter a low power mode to conserve energy. It utilizes UART for communication and ADC for voltage measurements.
 
 ### Main file
-The file that runs the entire program is [`main.c`](./Core/Src/main.c).
-> [`Main.c`](./Core/Src/main.c) is run based on the function [`StartPollingLoop`](./Core/Src/main.c#L936). 
+The file that runs the entire program is `main.c`.
+> `Main.c` is run based on the function `StartPollingLoop`. 
 
 
 ```c
@@ -93,6 +93,6 @@ This file contains functions for handling APRS (Automatic Packet Reporting Syste
   - Helper function to read big endian 4-byte data types.
   
 ### Retarget
-The [`retarget file`](./Core/Src/retarget.c)  is meant to allow us to use C functions printf and scanf directly in the terminal [[1]](#acknowledgements). This along with the file [`read_serial`](./testing/read_serial.py) allows us to send and recieve serial communication through the terminal and the board.
+The `retarget file` is meant to allow us to use C functions printf and scanf directly in the terminal [[1]](#acknowledgements). This along with the file `read_serial` allows us to send and recieve serial communication through the terminal and the board.
 ## Acknowledgements
 [1] S. Hymel, “How to use printf on STM32,” Shawn Hymel, https://shawnhymel.com/1873/how-to-use-printf-on-stm32/
