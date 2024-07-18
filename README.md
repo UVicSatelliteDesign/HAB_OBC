@@ -85,12 +85,10 @@ This file contains functions for handling APRS (Automatic Packet Reporting Syste
   - `pos`: The `Position` variable to store data in.
   - Returns The status of the SPI peripheral.
 
-- **[getLocationClbk()](./Core/Src/HAWB_APRS.c#L30-L34)**
-  - A callback function that reads the big endian data from the APRS.
+- **[getLocationClbk()](./Core/Src/HAWB_APRS.c#L30-L34)**:A callback function that reads the big endian data from the APRS.
   
 
-- **[readBE4SPI()](./Core/Src/HAWB_APRS.c#L41-L47)**
-  - Helper function to read big endian 4-byte data types.
+- **[readBE4SPI()](./Core/Src/HAWB_APRS.c#L41-L47)**:Helper function to read big endian 4-byte data types.
   
 ### Retarget
 The `retarget file` is meant to allow us to use C functions printf and scanf directly in the terminal [[1]](#acknowledgements). This along with the file `read_serial` allows us to send and recieve serial communication through the terminal and the board.
