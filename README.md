@@ -35,7 +35,7 @@ This project contains the firmware for an embedded system designed to monitor ba
 
 ### Main file
 The file that runs the entire program is `main.c`.
-> `Main.c` is run based on the function [`StartPollingLoop`](.Core/Src/main.c#L936-L959). 
+> `Main.c` is run based on the function [`StartPollingLoop`](./Core/Src/main.c#L936-L959). 
 >
 
 ![flowchart of the code](Software_FSM.drawio.png)
