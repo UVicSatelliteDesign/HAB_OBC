@@ -36,6 +36,8 @@ This project contains the firmware for an embedded system designed to monitor ba
 ### Main file
 The file that runs the entire program is `main.c`.
 > `Main.c` is run based on the function [`StartPollingLoop`](.Core/Src/main.c#L936-L959). 
+>
+
 ![flowchart of the code](Software_FSM.drawio.png)
 - **[checkBattery](./Core/Src/main.c#L240-L246)**: Checks the battery voltage using the `getVoltage` function. If the voltage is below a predetermined value, it initiates the `lowpowerMode` function.
 - **[getVoltage](./Core/Src/main.c#L203-L220)**: Reads the value from a specific ADC pin and converts it to a voltage value using a macro.
