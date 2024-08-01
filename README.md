@@ -19,6 +19,14 @@ The goal of the HAB is to gain experience in :
 - GroundStation System
 - Iterative Software Design 
 
+## Getting started
+
+This project utilizes git hook for code formatting on commits, config your `hooksPath` with
+
+```sh
+git config core.hooksPath .githooks
+```
+
 ## Directory Structure
 ### Core/Src/:
 - *main.c*: Contains the main control logic and core functions.
