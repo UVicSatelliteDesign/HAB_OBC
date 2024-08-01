@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+# bash strict mode, if you have stupid bash it will fail - Max
+set -euo pipefail 
+
+#>>> Auto fomatter hook:
+# Formatting all files in ./Core/**/*.{c,h}, if errors detected, git push action is denied.
+#
+# If codes have not been formatted by the time this hook is executed, it will create
+# a new commit with the code format applied, but will deny the push action still, 
+# since the commit containing the formatted code will not be push after this pre-push hook.
+#
+# If you know to push this formatting commit in the pre-push hook, let me know
+# -Hal
+
+# getting all staged files
+# --diff-filter="M": filter out only MODIFIED files
+# --cached: filter out only staged files
+# --name-only *.c *.h: format only header/c file
+files="$(git diff --diff-filter="M" --cached --name-only *.c *.h)"
+
+# no staged `.h` or `.c` files
+[[ -z $files ]] && echo "[hook: pre-commit] No formatting needed" && exit 0
+
+# format staged files
+clang-format -i "$files" --verbose -Werror;
+
+# check for the status code of clang-format
+[[ $? -ne 0 ]] && printf "\nCode error found - git commit action denied\n" && exit 1;
+
+git add .
