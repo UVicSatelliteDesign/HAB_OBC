@@ -191,7 +191,8 @@ void lowPowerMode(){
 	uint32_t lastTickCount_ms = 0;
 	HAL_GPIO_WritePin(GPIOB, LD1_Pin, GPIO_PIN_RESET);
     //stopTransmitter();
-    while(1){
+   cutBalloon();
+	while(1){
     	if((uint32_t)(HAL_GetTick() - lastTickCount_ms) >= logPeriod){
     		lastTickCount_ms = HAL_GetTick();
 
@@ -262,13 +263,13 @@ void checkLocation(void){
     if (position.longitude < maxLongitude && position.longitude > minLongitude){
         if(position.latitude < maxLatitude && position.latitude > minLatitude){
             if(checkAltitude(position.altitude) == 1){
-                cutBalloon();
+                lowPowerMode();
             }
             return;
         }
     }
 
-    cutBalloon();
+    lowPowerMode();
 }
 
 //The functions needs to have a parameter
