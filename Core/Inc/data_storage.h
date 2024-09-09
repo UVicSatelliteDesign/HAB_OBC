@@ -1,3 +1,9 @@
+/**
+ * @file data_storage.h
+ * @author Kali Erickson, kali.erickson@outlook.com
+ * @brief Library for accessing flash memory.
+ */
+
 #ifndef DATA_STORAGE_H_
 #define DATA_STORAGE_H_
 

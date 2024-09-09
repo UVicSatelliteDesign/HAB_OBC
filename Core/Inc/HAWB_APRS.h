@@ -1,8 +1,8 @@
-/*
- * HAWB_APRS.h
- *
- *  Created on: Mar 7, 2024
- *      Author: aabuelazm
+/**
+ * @file HAWB_APRS.h
+ * @brief Library for accessing APRS data
+ * Created on: Mar 7, 2024
+ * @author aabuelazm
  */
 
 #ifndef INC_HAWB_APRS_H_

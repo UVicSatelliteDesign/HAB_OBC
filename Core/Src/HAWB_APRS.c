@@ -1,8 +1,7 @@
-/*
- * HAWB_APRS.c
- *
- *  Created on: Mar 7, 2024
- *      Author: aabuelazm
+/**
+ * @file HAWB_APRS.c
+ * Created on: Mar 7, 2024
+ * @author aabuelazm
  */
 
 #include "HAWB_APRS.h"

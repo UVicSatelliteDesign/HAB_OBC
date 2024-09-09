@@ -1,3 +1,8 @@
+/**
+ * @file data_storage.c
+ * @author Kali Erickson, kali.erickson@outlook.com
+ */
+
 #include "data_storage.h"
 
 void erase_bank() {
