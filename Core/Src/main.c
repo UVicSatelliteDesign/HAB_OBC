@@ -925,6 +925,12 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   }
 }
 
+void send_over_serial(){
+  char packet[256]="";
+  transfer_serial_for_testing(packet);
+  printf("%s",packet );
+}
+
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_StartPollingLoop */
@@ -942,10 +948,11 @@ void StartPollingLoop(void *argument)
 	uint32_t lastTime_ms = 0;
 	HAL_GPIO_WritePin(GPIOB, LD1_Pin, GPIO_PIN_SET);
 
+
 	for(;;){
 		if((uint32_t)(HAL_GetTick() - lastTime_ms) >= logPeriod){
 			lastTime_ms = HAL_GetTick();
-
+      
 			checkBattery();
 			checkLocation();
 
@@ -954,6 +961,9 @@ void StartPollingLoop(void *argument)
 			}
 
 			logData();
+      send_over_serial();
+      
+
 		}
 	}
   /* USER CODE END 5 */

@@ -114,3 +114,16 @@ void test_read_data(UART_HandleTypeDef huart3) {
 
   read_data(huart3);
 }
+
+void transfer_serial_for_testing(char packet_buffer[256]) {
+  strcpy(packet_buffer,"");
+  char buffer[32] = "";          
+  int i = FLASH_USER_START_ADDR;
+
+  for (; i < cur_flash_addr; i += 32) {
+    snprintf(buffer, 32, "%u", *(uint32_t *)(i));  
+    strcat(packet_buffer, buffer);                 
+    strcat(packet_buffer, "_");                    
+  }
+  packet_buffer[255]="\0";
+}

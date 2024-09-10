@@ -4,6 +4,8 @@
 #include "stm32h7xx.h"
 #include <stdint.h>
 #include <stdio.h>
+#include <inttypes.h>
+#include <string.h>
 
 #define FLASH_USER_START_ADDR FLASH_BANK2_BASE;
 static uint32_t cur_flash_addr = FLASH_USER_START_ADDR;
@@ -67,3 +69,11 @@ void test_log_data();
 void test_read_data(UART_HandleTypeDef huart3);
 
 #endif /*DATA_STORAGE_H_*/
+
+/**
+ * @brief Convert the elements of data from flash memory and covert it into a string to string
+ * 
+ * This functions creates the packet to send the data over the UART.
+ * 
+ */
+void transfer_serial_for_testing();
