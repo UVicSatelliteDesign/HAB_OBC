@@ -1,5 +1,5 @@
 #include "data_storage.h"
-
+#define BIT_WIDTH 32
 void erase_bank() {
   HAL_FLASH_Unlock();
 
@@ -46,13 +46,13 @@ void write_data(uint32_t *data) {
 
   HAL_FLASH_Lock();
 
-  cur_flash_addr += 32; // 8 words * 4 bytes per word = 32
+  cur_flash_addr += BIT_WIDTH; // 8 words * 4 bytes per word = 32
 }
 
 void read_data(UART_HandleTypeDef huart3) {
   int i = FLASH_USER_START_ADDR;
-  for (; i < cur_flash_addr; i += 32) {
-    HAL_UART_Transmit(&huart3, &(*(uint32_t *)(i)), 32, 100);
+  for (; i < cur_flash_addr; i += BIT_WIDTH) {
+    HAL_UART_Transmit(&huart3, &(*(uint32_t *)(i)), BIT_WIDTH, 100);
   }
 }
 
@@ -115,15 +115,16 @@ void test_read_data(UART_HandleTypeDef huart3) {
   read_data(huart3);
 }
 
-void transfer_serial_for_testing(char packet_buffer[256]) {
+void transfer_serial_for_testing(char packet_buffer[257]) {   // 8*32+1 bytes 
+
   strcpy(packet_buffer,"");
-  char buffer[32] = "";          
+  char buffer[BIT_WIDTH] = "";          
   int i = FLASH_USER_START_ADDR;
 
-  for (; i < cur_flash_addr; i += 32) {
-    snprintf(buffer, 32, "%u", *(uint32_t *)(i));  
+  for (; i < cur_flash_addr; i += BIT_WIDTH) {
+    snprintf(buffer, BIT_WIDTH, "%u", *(uint32_t *)(i));  
     strcat(packet_buffer, buffer);                 
     strcat(packet_buffer, "_");                    
   }
-  packet_buffer[255]="\0";
+  packet_buffer[256]="\0";
 }

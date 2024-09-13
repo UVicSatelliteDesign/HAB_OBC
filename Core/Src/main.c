@@ -926,9 +926,9 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 }
 
 void send_over_serial(){
-  char packet[256]="";
+  char packet[257]="";  // there are 8 elements in the struct and each element has 32 bits. So the final value is 32*8+1
   transfer_serial_for_testing(packet);
-  printf("%s",packet );
+  printf("%s \n",packet );
 }
 
 /* USER CODE END 4 */
