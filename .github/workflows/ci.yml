@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install clang-format
-        run: apt-get update && apt apt-get install clang-format-14
+        run: sudo apt-get update && sudo apt-get install clang-format-14
       - name: Format checker
         run: |
           # -n dry run
