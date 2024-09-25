@@ -63,7 +63,7 @@ void write_data(uint32_t *data) {
 
 void read_data(UART_HandleTypeDef huart3) {
   int i = FLASH_USER_START_ADDR;
-  for (; i < cur_flash_addr; i += WORD_LENGTH_BYTES) {
+  for (; i < *(uint32_t *)(cur_flash_addr); i += WORD_LENGTH_BYTES) {
     HAL_UART_Transmit(&huart3, &(*(uint32_t *)(i)), WORD_LENGTH_BYTES, 100);
   }
 }
@@ -83,7 +83,7 @@ void test_log_data() {
   write_data((uint32_t *)(&data));
 
   int count = 0;
-  for (; i < cur_flash_addr; i += WORD_LENGTH_BYTES) {
+  for (; i < *(uint32_t *)(cur_flash_addr); i += WORD_LENGTH_BYTES) {
     uint32_t d = *(uint32_t *)(i);
     switch (count) {
     case 0:
