@@ -28,6 +28,11 @@ void erase_bank() {
   // erase bank 2
   HAL_FLASHEx_Erase(&flash_erase_struct, &error_status);
 
+  // Write TODO
+  uint32_t start_flash_addr = FLASH_USER_START_ADDR + 32;
+  HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, cur_flash_addr,
+		  	  	  	  (uint32_t)(&start_flash_addr));
+
   HAL_FLASH_Lock();
 
   // check error status
@@ -40,18 +45,23 @@ void write_data(uint32_t *data) {
   assert(data != NULL);
 
   // Do not write more data if the end of the flash memory has been reached
-  if (cur_flash_addr >= FLASH_END) {
+  if (*(uint32_t *)(cur_flash_addr) >= FLASH_END) {
     return;
   }
 
   HAL_FLASH_Unlock();
 
-  HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, cur_flash_addr,
+  HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, *(uint32_t *)(cur_flash_addr),
                     (uint32_t)data);
+
+  uint32_t next_flash_addr = *(uint32_t *)(cur_flash_addr) + 32;
+
+  HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, cur_flash_addr,
+  		  	  	  	  (uint32_t)(&next_flash_addr));
 
   HAL_FLASH_Lock();
 
-  cur_flash_addr += 32; // 8 words * 4 bytes per word = 32
+  //cur_flash_addr += 32; // 8 words * 4 bytes per word = 32
 }
 
 void read_data(UART_HandleTypeDef huart3) {
