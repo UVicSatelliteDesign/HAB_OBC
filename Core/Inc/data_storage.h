@@ -12,6 +12,8 @@
 #include <stdio.h>
 
 #define FLASH_USER_START_ADDR FLASH_BANK2_BASE;
+#define WORD_LENGTH_BYTES 4
+#define LINE_LENGTH_BYTES 32
 static uint32_t cur_flash_addr = FLASH_USER_START_ADDR;
 
 /**
@@ -21,13 +23,13 @@ static uint32_t cur_flash_addr = FLASH_USER_START_ADDR;
  * The last 32 bits are zeros inserted to pad to the size of a flash word.
  */
 typedef struct {
-  float time;
-  float volts;
-  int longitude;
-  int latitude;
-  int altitude;
-  float temperature;
-  float current;
+  int32_t time;
+  int32_t volts;
+  float longitude;
+  float latitude;
+  float altitude;
+  int32_t temperature;
+  int32_t current;
   uint32_t pad;
 } Data;
 
