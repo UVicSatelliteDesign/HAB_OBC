@@ -1,0 +1,37 @@
+digraph "StartPollingLoop"
+{
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="StartPollingLoop",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Function implementing the PollingLoop thread."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="checkBattery",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$main_8c.html#aa83247e4f6ab7b75375411b33d06b4ed",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="getVoltage",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$main_8c.html#a14b93c949846ddbbd680be6f809a50e0",tooltip=" "];
+  Node2 -> Node4 [id="edge3_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="lowPowerMode",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$main_8c.html#a981db6ff810219d7738bceedee5d257c",tooltip=" "];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="cutBalloon",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$main_8c.html#ad6e2a047d18a9b03e58ce3edb8f16bfb",tooltip=" "];
+  Node4 -> Node6 [id="edge5_Node000004_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="logData",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$main_8c.html#a265445e36681dc69e4b06f1cf8c9eb76",tooltip=" "];
+  Node6 -> Node7 [id="edge6_Node000006_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fetchData",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$main_8c.html#a651818c4f461ea9dd9333286e21b64ad",tooltip=" "];
+  Node7 -> Node8 [id="edge7_Node000007_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="getCurrent",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$main_8c.html#aa4dd018fd4d39cda6080f79d9dfd02df",tooltip=" "];
+  Node7 -> Node3 [id="edge8_Node000007_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node6 -> Node9 [id="edge9_Node000006_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="write_data",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$data__storage_8c.html#ac978f7e70df8c1d285a3c18511e26c13",tooltip="Write 8 32-bit words to the flash memory."];
+  Node1 -> Node10 [id="edge10_Node000001_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="checkLocation",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$main_8c.html#a3ff8c676195c0e5cdbd603661fddb8dc",tooltip=" "];
+  Node10 -> Node11 [id="edge11_Node000010_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="checkAltitude",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$main_8c.html#aa08443b555b6a2a091f6224d2c74f067",tooltip=" "];
+  Node10 -> Node12 [id="edge12_Node000010_Node000012",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="getLocation",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$HAWB__APRS_8c.html#a5711641ccbef7050bd8a18308f068c31",tooltip="Copies the received data from the SPI DMA to the position data type."];
+  Node10 -> Node4 [id="edge13_Node000010_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node6 [id="edge14_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node4 [id="edge15_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node13 [id="edge16_Node000001_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="RetargetInit",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$retarget_8c.html#ac7028227e5051dfa3bb8fabb0edd07c8",tooltip=" "];
+}
