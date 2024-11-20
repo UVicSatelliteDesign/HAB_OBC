@@ -29,7 +29,7 @@ void erase_bank() {
   HAL_FLASHEx_Erase(&flash_erase_struct, &error_status);
 
   // Store next available flash memory address
-  uint32_t start_flash_addr = FLASH_USER_START_ADDR + LINE_LENGTH_BYTES;
+  uint32_t start_flash_addr = flash_user_start_addr + LINE_LENGTH_BYTES;
   HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, cur_flash_addr,
 		  	  	  	  (uint32_t)(&start_flash_addr));
 

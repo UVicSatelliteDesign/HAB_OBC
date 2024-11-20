@@ -12,9 +12,10 @@
 #include <stdio.h>
 
 #define FLASH_USER_START_ADDR FLASH_BANK2_BASE;
-#define WORD_LENGTH_BYTES 4
-#define LINE_LENGTH_BYTES 32
+#define WORD_LENGTH_BYTES 4  // 4 bytes per word = 32 bits
+#define LINE_LENGTH_BYTES 32 // 8 words per line * 4 bytes per word
 static uint32_t cur_flash_addr = FLASH_USER_START_ADDR;
+static const uint32_t flash_user_start_addr = FLASH_USER_START_ADDR;
 
 /**
  * @brief Structure for passing data to be stored in flash memory.
