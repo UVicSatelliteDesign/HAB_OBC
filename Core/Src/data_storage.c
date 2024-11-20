@@ -1,3 +1,8 @@
+/**
+ * @file data_storage.c
+ * @author Kali Erickson, kali.erickson@outlook.com
+ */
+
 #include "data_storage.h"
 
 void erase_bank() {
@@ -23,6 +28,11 @@ void erase_bank() {
   // erase bank 2
   HAL_FLASHEx_Erase(&flash_erase_struct, &error_status);
 
+  // Store next available flash memory address
+  uint32_t start_flash_addr = flash_user_start_addr + LINE_LENGTH_BYTES;
+  HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, cur_flash_addr,
+		  	  	  	  (uint32_t)(&start_flash_addr));
+
   HAL_FLASH_Lock();
 
   // check error status
@@ -35,24 +45,26 @@ void write_data(uint32_t *data) {
   assert(data != NULL);
 
   // Do not write more data if the end of the flash memory has been reached
-  if (cur_flash_addr >= FLASH_END) {
+  if (*(uint32_t *)(cur_flash_addr) >= FLASH_END) {
     return;
   }
 
   HAL_FLASH_Unlock();
 
-  HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, cur_flash_addr,
+  HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, *(uint32_t *)(cur_flash_addr),
                     (uint32_t)data);
 
-  HAL_FLASH_Lock();
+  uint32_t next_flash_addr = *(uint32_t *)(cur_flash_addr) + LINE_LENGTH_BYTES;
+  HAL_FLASH_Program(FLASH_TYPEPROGRAM_FLASHWORD, cur_flash_addr,
+  		  	  	  	  (uint32_t)(&next_flash_addr));
 
-  cur_flash_addr += 32; // 8 words * 4 bytes per word = 32
+  HAL_FLASH_Lock();
 }
 
 void read_data(UART_HandleTypeDef huart3) {
   int i = FLASH_USER_START_ADDR;
-  for (; i < cur_flash_addr; i += 32) {
-    HAL_UART_Transmit(&huart3, &(*(uint32_t *)(i)), 32, 100);
+  for (; i < *(uint32_t *)(cur_flash_addr); i += WORD_LENGTH_BYTES) {
+    HAL_UART_Transmit(&huart3, &(*(uint32_t *)(i)), WORD_LENGTH_BYTES, 100);
   }
 }
 
@@ -71,7 +83,7 @@ void test_log_data() {
   write_data((uint32_t *)(&data));
 
   int count = 0;
-  for (; i < cur_flash_addr; i += 4) {
+  for (; i < *(uint32_t *)(cur_flash_addr); i += WORD_LENGTH_BYTES) {
     uint32_t d = *(uint32_t *)(i);
     switch (count) {
     case 0:

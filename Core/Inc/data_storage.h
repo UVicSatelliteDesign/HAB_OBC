@@ -1,3 +1,9 @@
+/**
+ * @file data_storage.h
+ * @author Kali Erickson, kali.erickson@outlook.com
+ * @brief Library for accessing flash memory.
+ */
+
 #ifndef DATA_STORAGE_H_
 #define DATA_STORAGE_H_
 
@@ -6,7 +12,10 @@
 #include <stdio.h>
 
 #define FLASH_USER_START_ADDR FLASH_BANK2_BASE;
+#define WORD_LENGTH_BYTES 4  // 4 bytes per word = 32 bits
+#define LINE_LENGTH_BYTES 32 // 8 words per line * 4 bytes per word
 static uint32_t cur_flash_addr = FLASH_USER_START_ADDR;
+static const uint32_t flash_user_start_addr = FLASH_USER_START_ADDR;
 
 /**
  * @brief Structure for passing data to be stored in flash memory.
@@ -15,13 +24,13 @@ static uint32_t cur_flash_addr = FLASH_USER_START_ADDR;
  * The last 32 bits are zeros inserted to pad to the size of a flash word.
  */
 typedef struct {
-  float time;
-  float volts;
-  int longitude;
-  int latitude;
-  int altitude;
-  float temperature;
-  float current;
+  int32_t time;
+  int32_t volts;
+  float longitude;
+  float latitude;
+  float altitude;
+  int32_t temperature;
+  int32_t current;
   uint32_t pad;
 } Data;
 
