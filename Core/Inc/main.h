@@ -142,13 +142,13 @@ void checkLocation(void);
 #define LD2_GPIO_Port GPIOE
 
 /* USER CODE BEGIN Private defines */
-#define powMin 10  // Replace with the actual power threshold value
+#define powMin 7000  // Min power threshold, in mV, before entering low power mode
 #define maxLongitude 0
 #define minLongitude 0
 #define maxLatitude 0
 #define minLatitude 0
 #define maxAltitude 0
-#define voltageConversion_mV 6 // int(25000 / 4095) = mav mV / 12-bit ADC resolution
+#define voltageConversion_mV 4 // int(16500 / 4095) = mav mV / 12-bit ADC resolution
 #define currentConversion_mA 7 // int(30000 / 4095) = mav mA / 12-bit ADC resolution
 
 #define logPeriod	60000	// Period for logging data, in milliseconds.
