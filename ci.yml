@@ -1,0 +1,20 @@
+on: [push]
+
+name: CI
+
+jobs:
+  build:
+    name: CI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install clang-format
+        run: sudo apt-get update && sudo apt-get install clang-format-14
+      - name: Format checker
+        run: |
+          # -n dry run
+          # --files: the file containing all files to apply this format checker
+          # --Werror: turns unformatted codes into errors
+          # -i: applies the auto formatter, this is used locally and not in github action, ie before pushing
+          clang-format -n --files '.format-checker' --Werror || \
+            (echo; echo "format your code: clang-format -i --files '.format-checker'"; exit 1)
