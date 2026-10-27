@@ -4,6 +4,7 @@
  */
 
 #include "data_storage.h"
+#include <assert.h>
 
 void erase_bank() {
   HAL_FLASH_Unlock();
@@ -64,7 +65,7 @@ void write_data(uint32_t *data) {
 void read_data(UART_HandleTypeDef huart3) {
   int i = FLASH_USER_START_ADDR;
   for (; i < *(uint32_t *)(cur_flash_addr); i += WORD_LENGTH_BYTES) {
-    HAL_UART_Transmit(&huart3, &(*(uint32_t *)(i)), WORD_LENGTH_BYTES, 100);
+    HAL_UART_Transmit(&huart3, (uint8_t *)(uintptr_t)i, WORD_LENGTH_BYTES, 100);
   }
 }
 
